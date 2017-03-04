@@ -3,3 +3,7 @@ udacityDatasetExtraction/object-detection-crowdai
 udacityDatasetExtraction/out
 
 udacityDatasetExtraction/object-detection-crowdai\.tar\.gz
+
+__pycache__/
+
+examples/\.DS_Store

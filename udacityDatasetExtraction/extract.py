@@ -1,5 +1,5 @@
 import os
-#import matplotlib.image as mpimg
+import numpy as np
 import cv2
 import pandas
 
@@ -19,18 +19,41 @@ extracted = 0
 processed = 0
 for tuple in csv.itertuples():
 	
+	lastFrame = None
+	img = None
 	if tuple.Label == "Car":
 		frame = tuple.Frame
-		img = cv2.imread("object-detection-crowdai/"+frame)
+
+		# Don't read the file again if we already did
+		if frame != lastFrame:
+			lastFrame = frame
+			img = cv2.imread("object-detection-crowdai/"+frame)
+
+		width = tuple.xmax - tuple.xmin
+		height = tuple.ymax - tuple.ymin
+
+		# print("File: ", frame, " Size: ", (width, height))
+
+		# Just ignore smaller images
+		if width < 64 or height < 64:
+			# print("Ignored")
+			continue
+
 		# Crop image from bounding box
 		cropped_img = img[tuple.ymin:tuple.ymax,tuple.xmin:tuple.xmax]
+		# Resize to 64x64
+		resized = cv2.resize(cropped_img, (64,64))
 		orig_filename, _ = os.path.splitext(frame)
 		filename_prefix = str(tuple.ymin+tuple.xmin+tuple.xmin+tuple.xmax)
 		filename = "out/" + filename_prefix + orig_filename + ".png"
+
+		# If a filename already exists it's the same data labeled twice, it's alright to overwrite or skip it
 		if os.path.isfile(filename):
 			print("File already exists:", filename)
-		cv2.imwrite(filename, cropped_img)
-		extracted += 1
+		else:
+			cv2.imwrite(filename, resized)
+			extracted += 1
+
 		if extracted % 100 == 0:
 			print("Extracted: ", extracted, " samples...")
 	processed += 1
