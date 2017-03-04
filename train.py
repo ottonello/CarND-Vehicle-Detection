@@ -27,7 +27,6 @@ hist_bins = 16    # Number of histogram bins
 spatial_feat = True # Spatial features on or off
 hist_feat = True # Histogram features on or off
 hog_feat = True # HOG features on or off
-y_start_stop = [None, None] # Min and max in y to search in slide_window()
 
 # Get features for each set, then stack them together
 # Extract color, HOG features
@@ -75,5 +74,15 @@ print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
 
 # Save classifier
 clf_file = "clf.pkl"
-print("Saving classifier into file: ", clf_file)
+print("Saving classifier, scaler and parameters into file: ", clf_file)
+
+dist_pickle = {}
+dist_pickle["svc"]= svc
+dist_pickle["scaler"]= X_scaler
+dist_pickle["orient"]= orient
+dist_pickle["pix_per_cell"]= pix_per_cell
+dist_pickle["cell_per_block"]=cell_per_block
+dist_pickle["spatial_size"]=spatial_size
+dist_pickle["hist_bins"]= hist_bins
+
 pickle.dump(svc,  open(clf_file, 'wb'))
