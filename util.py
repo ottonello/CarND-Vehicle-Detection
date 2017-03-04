@@ -4,9 +4,16 @@ import numpy as np
 from skimage.feature import hog
 from sklearn.preprocessing import StandardScaler
 
-def bin_spatial(img, color_space='RGB', size=(32, 32)):
-    features = cv2.resize(img, size).ravel()
-    return features
+def convert_color(img, color_space):
+    # Will throw error if an invalid conversion is requested
+    color_conversion = getattr(cv2, "COLOR_RGB2" + color_space)
+    return cv2.cvtColor(img, color_conversion)
+
+def bin_spatial(img, size=(32, 32)):
+    color1 = cv2.resize(img[:,:,0], size).ravel()
+    color2 = cv2.resize(img[:,:,1], size).ravel()
+    color3 = cv2.resize(img[:,:,2], size).ravel()
+    return np.hstack((color1, color2, color3))
 
 def color_hist(img, nbins=32, bins_range=(0, 256)):
     # Compute the histogram of the color channels separately
@@ -43,11 +50,10 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
         file_features = []
         # Read in each one by one
         image = mpimg.imread(file)
+
         # apply color conversion if other than 'RGB'
         if color_space != 'RGB':
-            # Will throw error if an invalid conversion is requested
-            color_conversion = getattr(cv2, "COLOR_RGB2" + color_space)
-            feature_image = cv2.cvtColor(image, color_conversion)
+            feature_image = convert_color(image, color_space)
         else: 
             feature_image = np.copy(image)      
 
@@ -63,8 +69,7 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
             if hog_channel == 'ALL':
                 hog_features = []
                 for channel in range(feature_image.shape[2]):
-                    hog_features.append(get_hog_features(feature_image[:,:,channel], 
-                                        orient, pix_per_cell, cell_per_block, 
+                    hog_features.append(get_hog_features(feature_image[:,:,channel], orient, pix_per_cell, cell_per_block, 
                                         vis=False, feature_vec=True))
                 hog_features = np.ravel(hog_features)        
             else:
@@ -72,6 +77,18 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
                             pix_per_cell, cell_per_block, vis=False, feature_vec=True)
             # Append the new feature vector to the features list
             file_features.append(hog_features)
+        
         features.append(np.concatenate(file_features))
     # Return list of feature vectors
     return features
+
+# Define a function to draw bounding boxes
+def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
+    # Make a copy of the image
+    imcopy = np.copy(img)
+    # Iterate through the bounding boxes
+    for bbox in bboxes:
+        # Draw a rectangle given bbox coordinates
+        cv2.rectangle(imcopy, bbox[0], bbox[1], color, thick)
+    # Return the image copy with boxes drawn
+    return imcopy
