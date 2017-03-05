@@ -17,9 +17,9 @@ print("Total: ", len(csv), " samples")
 
 extracted = 0
 processed = 0
+lastFrame = None
+
 for tuple in csv.itertuples():
-	
-	lastFrame = None
 	img = None
 	if tuple.Label == "Car":
 		frame = tuple.Frame

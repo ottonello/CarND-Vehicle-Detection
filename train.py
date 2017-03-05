@@ -14,11 +14,17 @@ cars_udacity = glob.glob("data/vehicle_udacity/*.png")
 cars = cars + cars_udacity
 # TOOD add udacity dataset
 notcars = glob.glob("data/non-vehicle/*.png")
+notcars_udacity = glob.glob("data/out_nonvehicle_2/*.png")
+notcars = notcars + notcars_udacity
 
-sample_size = 50000
-cars = shuffle(cars, random_state=0)
+sample_size = 7000
+cars = shuffle(cars, random_state=1)
 cars = cars[0:sample_size]
+notcars = shuffle(notcars, random_state=1)
 notcars = notcars[0:sample_size]
+
+print('Final size of cars: ', len(cars))
+print('Final size of non-cars: ', len(notcars))
 
 ###$$$ TRAINING PARAMETERS $$$###
 color_space = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
@@ -32,6 +38,7 @@ spatial_feat = True # Spatial features on or off
 hist_feat = True # Histogram features on or off
 hog_feat = True # HOG features on or off
 
+print("Extracting car features...")
 # Get features for each set, then stack them together
 # Extract color, HOG features
 car_features = extract_features(cars, color_space=color_space, 
@@ -40,6 +47,7 @@ car_features = extract_features(cars, color_space=color_space,
                         cell_per_block=cell_per_block, 
                         hog_channel=hog_channel, spatial_feat=spatial_feat, 
                         hist_feat=hist_feat, hog_feat=hog_feat)
+print("Extracting not-car features...")
 notcar_features = extract_features(notcars, color_space=color_space, 
                         spatial_size=spatial_size, hist_bins=hist_bins, 
                         orient=orient, pix_per_cell=pix_per_cell, 
@@ -48,6 +56,7 @@ notcar_features = extract_features(notcars, color_space=color_space,
                         hist_feat=hist_feat, hog_feat=hog_feat)
 X = np.vstack((car_features, notcar_features)).astype(np.float64)                        
 
+print("Normalizing...")
 # Normalize features
 X_scaler = StandardScaler().fit(X)
 scaled_X = X_scaler.transform(X)
@@ -55,10 +64,12 @@ scaled_X = X_scaler.transform(X)
 # Label data
 y = np.hstack((np.ones(len(car_features)), np.zeros(len(notcar_features))))
 
+print("Splitting...")
 # Split into training & test
 rand_state = np.random.randint(0, 100)
 X_train, X_test, y_train, y_test = train_test_split(scaled_X, y, test_size=0.2, random_state=rand_state)
 
+print("Training...")
 print('Using:',orient,'orientations',pix_per_cell, 'pixels per cell and', cell_per_block,'cells per block')
 print('Feature vector length:', len(X_train[0]))
 

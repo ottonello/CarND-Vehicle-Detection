@@ -45,6 +45,7 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
                         spatial_feat=True, hist_feat=True, hog_feat=True):
     # Create a list to append feature vectors to
     features = []
+    processed = 0
     # Iterate through the list of images
     for file in imgs:
         file_features = []
@@ -79,6 +80,9 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
             file_features.append(hog_features)
         
         features.append(np.concatenate(file_features))
+        processed += 1
+        if processed % 1000 == 0:
+            print("Extracted features on: ", processed)
     # Return list of feature vectors
     return features
 
