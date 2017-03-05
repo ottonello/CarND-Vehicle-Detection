@@ -4,7 +4,7 @@ import numpy as np
 import time
 import pickle
 from util import *
-from sklearn.svm import LinearSVC
+from sklearn.svm import LinearSVC, SVC
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 
@@ -17,18 +17,17 @@ notcars = glob.glob("data/non-vehicle/*.png")
 # notcars_udacity = glob.glob("data/out_nonvehicle_2/*.png")
 # notcars = notcars + notcars_udacity
 
-# sample_size = 1000
-# cars = shuffle(cars, random_state=1)
-# cars = cars[0:sample_size]
-# notcars = shuffle(notcars, random_state=1)
-# notcars = notcars[0:sample_size]
-
+sample_size = 6941
+cars = shuffle(cars, random_state=1)
+cars = cars[0:sample_size]
+notcars = shuffle(notcars, random_state=1)
+notcars = notcars[0:sample_size]
 print('Final size of cars: ', len(cars))
 print('Final size of non-cars: ', len(notcars))
 
 ###$$$ TRAINING PARAMETERS $$$###
 color_space = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
-orient = 9  # HOG orientations
+orient = 9 # HOG orientations
 pix_per_cell = 8 # HOG pixels per cell
 cell_per_block = 2 # HOG cells per block
 hog_channel = 0 # Can be 0, 1, 2, or "ALL"

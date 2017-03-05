@@ -39,7 +39,43 @@ def get_hog_features(img, orient, pix_per_cell, cell_per_block, vis=False, featu
                        visualise=vis, feature_vector=feature_vec)
         return features
 
-def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
+def get_features(image, color_space='RGB', spatial_size=(32, 32),
+                        hist_bins=32, orient=9, 
+                        pix_per_cell=8, cell_per_block=2, hog_channel=0,
+                        spatial_feat=True, hist_feat=True, hog_feat=True):
+    file_features = []
+
+    # apply color conversion if other than 'RGB'
+    if color_space != 'RGB':
+        feature_image = convert_color(image, color_space)
+    else: 
+        feature_image = np.copy(image)      
+
+    if spatial_feat == True:
+        spatial_features = bin_spatial(feature_image, size=spatial_size)
+        file_features.append(spatial_features)
+    if hist_feat == True:
+        # Apply color_hist()
+        hist_features = color_hist(feature_image, nbins=hist_bins)
+        file_features.append(hist_features)
+    if hog_feat == True:
+    # Call get_hog_features() with vis=False, feature_vec=True
+        if hog_channel == 'ALL':
+            hog_features = []
+            for channel in range(feature_image.shape[2]):
+                hog_features.append(get_hog_features(feature_image[:,:,channel], orient, pix_per_cell, cell_per_block, 
+                                    vis=False, feature_vec=True))
+            hog_features = np.ravel(hog_features)        
+        else:
+            hog_features = get_hog_features(feature_image[:,:,hog_channel], orient, 
+                        pix_per_cell, cell_per_block, vis=False, feature_vec=True)
+        # Append the new feature vector to the features list
+        file_features.append(hog_features)
+
+    return file_features
+    
+
+def extract_features(imgs, add_flipped=False, color_space='RGB', spatial_size=(32, 32),
                         hist_bins=32, orient=9, 
                         pix_per_cell=8, cell_per_block=2, hog_channel=0,
                         spatial_feat=True, hist_feat=True, hog_feat=True):
@@ -48,38 +84,18 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
     processed = 0
     # Iterate through the list of images
     for file in imgs:
-        file_features = []
         # Read in each one by one
         image = mpimg.imread(file)
 
-        # apply color conversion if other than 'RGB'
-        if color_space != 'RGB':
-            feature_image = convert_color(image, color_space)
-        else: 
-            feature_image = np.copy(image)      
-
-        if spatial_feat == True:
-            spatial_features = bin_spatial(feature_image, size=spatial_size)
-            file_features.append(spatial_features)
-        if hist_feat == True:
-            # Apply color_hist()
-            hist_features = color_hist(feature_image, nbins=hist_bins)
-            file_features.append(hist_features)
-        if hog_feat == True:
-        # Call get_hog_features() with vis=False, feature_vec=True
-            if hog_channel == 'ALL':
-                hog_features = []
-                for channel in range(feature_image.shape[2]):
-                    hog_features.append(get_hog_features(feature_image[:,:,channel], orient, pix_per_cell, cell_per_block, 
-                                        vis=False, feature_vec=True))
-                hog_features = np.ravel(hog_features)        
-            else:
-                hog_features = get_hog_features(feature_image[:,:,hog_channel], orient, 
-                            pix_per_cell, cell_per_block, vis=False, feature_vec=True)
-            # Append the new feature vector to the features list
-            file_features.append(hog_features)
+        features.append(np.concatenate(get_features(image, color_space, spatial_size, hist_bins, orient,
+            pix_per_cell, cell_per_block, hog_channel, spatial_feat, hist_feat, hog_feat)))
         
-        features.append(np.concatenate(file_features))
+        # mirror and also append features
+        if add_flipped:
+            flipped = cv2.flip(image, flipCode=1)
+            features.append(np.concatenate(get_features(flipped,color_space, spatial_size, hist_bins, orient,
+                pix_per_cell, cell_per_block, hog_channel, spatial_feat, hist_feat, hog_feat)))
+
         processed += 1
         if processed % 1000 == 0:
             print("Extracted features on: ", processed)
