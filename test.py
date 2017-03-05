@@ -26,10 +26,9 @@ spatial_feat = dist_pickle["spatial_feat"] # Spatial features on or off
 hist_feat = dist_pickle["hist_feat"] # Histogram features on or off
 hog_feat = dist_pickle["hog_feat"] # HOG features on or off
 
-ystart = 350
-ystop = 720
-scale = 1.4
-
+ystart = 400
+ystop = 656
+scale = 1.5
 
 for filename in glob.glob("test_images/*.jpg"):
 	img = mpimg.imread(filename)

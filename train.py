@@ -10,12 +10,12 @@ from sklearn.utils import shuffle
 
 # Load images vehicla, non-vehicle
 cars = glob.glob("data/vehicle/*.png")
-# cars_udacity = glob.glob("data/vehicle_udacity/*.png")
-# cars = cars_1 + cars_udacity
+cars_udacity = glob.glob("data/vehicle_udacity/*.png")
+cars = cars + cars_udacity
 # TOOD add udacity dataset
 notcars = glob.glob("data/non-vehicle/*.png")
 
-sample_size = 5000
+sample_size = 50000
 cars = shuffle(cars, random_state=0)
 cars = cars[0:sample_size]
 notcars = notcars[0:sample_size]

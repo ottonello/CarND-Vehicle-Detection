@@ -69,8 +69,15 @@ def find_cars(img,
             subimg = cv2.resize(ctrans_tosearch[ytop:ytop+window, xleft:xleft+window], (64,64))
           
             # Get color features
-            spatial_features = bin_spatial(subimg, size=spatial_size)
-            hist_features = color_hist(subimg, nbins=hist_bins)
+            if spatial_feat:
+                spatial_features = bin_spatial(subimg, size=spatial_size)
+            else:
+                spatial_features = []
+
+            if hist_feat:
+                hist_features = color_hist(subimg, nbins=hist_bins)
+            else:
+                hist_features = []
 
             # Scale features and make a prediction
             stacked = np.hstack((spatial_features, hist_features, hog_features)).reshape(1, -1)
