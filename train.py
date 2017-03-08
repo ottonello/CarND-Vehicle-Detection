@@ -13,15 +13,14 @@ from sklearn.utils import shuffle
 cars = glob.glob("data/vehicle/*.png")
 # cars_udacity = glob.glob("data/vehicle_udacity/*.png")
 # cars = cars + cars_udacity
-# TOOD add udacity dataset
 notcars = glob.glob("data/non-vehicle/*.png")
 # notcars_udacity = glob.glob("data/non-vehicle_udacity/*.png")
 # notcars = notcars + notcars_udacity
 
-sample_size = 5000
-cars = shuffle(cars, random_state=1)
+sample_size = 6000
+# cars = shuffle(cars, random_state=1)
 cars = cars[0:sample_size]
-notcars = shuffle(notcars, random_state=1)
+# notcars = shuffle(notcars, random_state=1)
 notcars = notcars[0:sample_size]
 print('Final size of cars: ', len(cars))
 print('Final size of non-cars: ', len(notcars))
