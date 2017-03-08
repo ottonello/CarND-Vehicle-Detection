@@ -1,5 +1,6 @@
 import os
 import pickle
+import time
 import cv2
 import matplotlib.image as mpimg
 import glob
@@ -26,18 +27,16 @@ spatial_feat = dist_pickle["spatial_feat"] # Spatial features on or off
 hist_feat = dist_pickle["hist_feat"] # Histogram features on or off
 hog_feat = dist_pickle["hog_feat"] # HOG features on or off
 
-ystart = 336
-ystop = 656
-scale = 1.5
-
 for filename in glob.glob("test_images/*.jpg"):
 	print(filename)
 	img = mpimg.imread(filename)
 
-	out_img = find_cars(img, 
-		ystart, ystop, scale, clf, color_space, X_scaler, orient,
+	t=time.time()
+	out_img = find_cars(img, clf, color_space, X_scaler, orient,
 		 pix_per_cell, cell_per_block, spatial_size, hist_bins, hog_channel,
-		 spatial_feat, hist_feat, hog_feat, False)
+		 spatial_feat, hist_feat, hog_feat, True)
+	t2 = time.time()
+	print(round(t2-t, 2), 'Seconds to find_cars...')
 
 	plt.imshow(out_img)
 	orig_filename, _ = os.path.splitext(filename)

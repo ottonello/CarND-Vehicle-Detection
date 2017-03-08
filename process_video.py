@@ -21,14 +21,8 @@ spatial_feat = dist_pickle["spatial_feat"] # Spatial features on or off
 hist_feat = dist_pickle["hist_feat"] # Histogram features on or off
 hog_feat = dist_pickle["hog_feat"] # HOG features on or off
 
-ystart = 336
-ystop = 656
-scale = 1.5
-
-
 def process_image(img):
-    return find_cars(img, 
-		ystart, ystop, scale, clf, color_space, X_scaler, orient,
+    return find_cars(img, clf, color_space, X_scaler, orient,
 		 pix_per_cell, cell_per_block, spatial_size, hist_bins, hog_channel,
 		 spatial_feat, hist_feat, hog_feat)
 

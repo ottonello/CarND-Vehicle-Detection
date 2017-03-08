@@ -21,24 +21,25 @@ def find_cars(img, svc, color_space, X_scaler, orient, pix_per_cell, cell_per_bl
      hog_channel='ALL', spatial_feat=True, hist_feat=True, hog_feat=True, do_threshold=True):
     draw_img = np.copy(img)
 
-    cells_per_step1 = 1.5  # Instead of overlap, define how many cells to step
-    scale1 = 1
-    box_list_1 = do_window_search(img, scale1, cells_per_step1, svc, color_space, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, 
+    cells_per_step1 = 1  # Instead of overlap, define how many cells to step
+    scale1 = 1.5
+    box_list = do_window_search(img, scale1, cells_per_step1, svc, color_space, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, 
      hog_channel, spatial_feat, hist_feat, hog_feat, do_threshold)
 
-    cells_per_step2 = 1
-    scale2 = 1.5
-    box_list_2 = do_window_search(img, scale2, cells_per_step2, svc, color_space, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins,
-     hog_channel, spatial_feat, hist_feat, hog_feat, do_threshold)
+    # cells_per_step2 = 2
+    # scale2 = 1
+    # box_list_2 = do_window_search(img, scale2, cells_per_step2, svc, color_space, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins,
+     # hog_channel, spatial_feat, hist_feat, hog_feat, do_threshold)
+    # box_list_2 = []
 
-    box_list = np.concatenate([x for x in [box_list_1, box_list_2] if len(x) > 0]) if len(box_list_1) or len(box_list_2) else []
+    # box_list = np.concatenate([x for x in [box_list_1, box_list_2] if len(x) > 0]) if len(box_list_1) or len(box_list_2) else []
 
     if do_threshold:
         heat = np.zeros_like(img[:,:,0]).astype(np.float)    
         # Add heat to each box in box list
         heat = add_heat(heat,box_list)
         # Apply threshold to help remove false positives
-        heat = apply_threshold(heat,1)
+        heat = apply_threshold(heat,2)
         # Visualize the heatmap when displaying    
         heatmap = np.clip(heat, 0, 255)
 
