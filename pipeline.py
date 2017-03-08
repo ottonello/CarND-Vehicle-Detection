@@ -16,7 +16,7 @@ from scipy.ndimage.measurements import label
 def find_cars(img, 
      ystart, ystop,
      scale, svc, color_space, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins,
-     hog_channel='ALL', spatial_feat='True', hist_feat='True', hog_feat='True'):
+     hog_channel='ALL', spatial_feat=True, hist_feat=True, hog_feat=True, do_threshold=True):
     
     draw_img = np.copy(img)
     img = img.astype(np.float32)/255
@@ -41,11 +41,11 @@ def find_cars(img,
     nyblocks = (ch1.shape[0] // pix_per_cell)-1
     nfeat_per_block = orient*cell_per_block**2
     # 64 was the orginal sampling rate, with 8 cells and 8 pix per cell
-    window = 64
+    window = 64 + 8
     nblocks_per_window = (window // pix_per_cell)-1 
-    cells_per_step = 1  # Instead of overlap, define how many cells to step
-    nxsteps = (nxblocks - nblocks_per_window) // cells_per_step
-    nysteps = (nyblocks - nblocks_per_window) // cells_per_step
+    cells_per_step = .5  # Instead of overlap, define how many cells to step
+    nxsteps = int((nxblocks - nblocks_per_window) // cells_per_step)
+    nysteps = int((nyblocks - nblocks_per_window) // cells_per_step)
     
     # Compute individual channel HOG features for the entire image
     if hog_channel == 0 or hog_channel == 'ALL':
@@ -59,8 +59,8 @@ def find_cars(img,
 
     for xb in range(nxsteps):
         for yb in range(nysteps):
-            ypos = yb*cells_per_step
-            xpos = xb*cells_per_step
+            ypos = int(yb*cells_per_step)
+            xpos = int(xb*cells_per_step)
 
             # Extract HOG for this patch
             hog_feat1 = []
@@ -105,19 +105,21 @@ def find_cars(img,
                 win_draw = np.int(window*scale)
                 box = [(xbox_left, ytop_draw+ystart),(xbox_left+win_draw,ytop_draw+win_draw+ystart)]
                 box_list.append(box)
-                # cv2.rectangle(draw_img,box,(0,0,255),6) 
+                if not do_threshold:
+                    cv2.rectangle(draw_img,(xbox_left, ytop_draw+ystart),(xbox_left+win_draw,ytop_draw+win_draw+ystart),(0,0,255),6) 
             
-    heat = np.zeros_like(img[:,:,0]).astype(np.float)    
-    # Add heat to each box in box list
-    heat = add_heat(heat,box_list)
-    # Apply threshold to help remove false positives
-    heat = apply_threshold(heat,3)
-    # Visualize the heatmap when displaying    
-    heatmap = np.clip(heat, 0, 255)
+    if do_threshold:
+        heat = np.zeros_like(img[:,:,0]).astype(np.float)    
+        # Add heat to each box in box list
+        heat = add_heat(heat,box_list)
+        # Apply threshold to help remove false positives
+        heat = apply_threshold(heat,4)
+        # Visualize the heatmap when displaying    
+        heatmap = np.clip(heat, 0, 255)
 
-    # Find final boxes from heatmap using label function
-    labels = label(heatmap)
-    draw_img = draw_labeled_bboxes(draw_img, labels)
+        # Find final boxes from heatmap using label function
+        labels = label(heatmap)
+        draw_img = draw_labeled_bboxes(draw_img, labels)
 
     return draw_img
 

@@ -23,7 +23,7 @@ hog_feat = dist_pickle["hog_feat"] # HOG features on or off
 
 ystart = 336
 ystop = 656
-scale = 2.0
+scale = 1.5
 
 
 def process_image(img):
@@ -34,6 +34,6 @@ def process_image(img):
 
 
 output_video = "solution_video.mp4"
-clip1 = VideoFileClip("test_video.mp4")
+clip1 = VideoFileClip("project_video.mp4")
 output_clip= clip1.fl_image(process_image)
 output_clip.write_videofile(output_video, audio=False)

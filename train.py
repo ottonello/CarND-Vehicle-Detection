@@ -5,6 +5,7 @@ import time
 import pickle
 from util import *
 from sklearn.svm import LinearSVC, SVC
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 
@@ -14,10 +15,10 @@ cars = glob.glob("data/vehicle/*.png")
 # cars = cars + cars_udacity
 # TOOD add udacity dataset
 notcars = glob.glob("data/non-vehicle/*.png")
-# notcars_udacity = glob.glob("data/out_nonvehicle_2/*.png")
+# notcars_udacity = glob.glob("data/non-vehicle_udacity/*.png")
 # notcars = notcars + notcars_udacity
 
-sample_size = 6941
+sample_size = 5000
 cars = shuffle(cars, random_state=1)
 cars = cars[0:sample_size]
 notcars = shuffle(notcars, random_state=1)
@@ -28,14 +29,15 @@ print('Final size of non-cars: ', len(notcars))
 ###$$$ TRAINING PARAMETERS $$$###
 color_space = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
 orient = 9 # HOG orientations
-pix_per_cell = 8 # HOG pixels per cell
-cell_per_block = 2 # HOG cells per block
-hog_channel = 0 # Can be 0, 1, 2, or "ALL"
+pix_per_cell = 8 # HOG pixels per cell 
+cell_per_block = 1 # HOG cells per block
+hog_channel = 'ALL' # Can be 0, 1, 2, or "ALL"
 spatial_size = (32, 32) # Spatial binning dimensions
 hist_bins = 32    # Number of histogram bins
 spatial_feat = True # Spatial features on or off
 hist_feat = True # Histogram features on or off
 hog_feat = True # HOG features on or off
+add_flipped = False # Augment data by flipping
 
 print("Extracting car features...")
 # Get features for each set, then stack them together
@@ -45,15 +47,18 @@ car_features = extract_features(cars, color_space=color_space,
                         orient=orient, pix_per_cell=pix_per_cell, 
                         cell_per_block=cell_per_block, 
                         hog_channel=hog_channel, spatial_feat=spatial_feat, 
-                        hist_feat=hist_feat, hog_feat=hog_feat)
+                        hist_feat=hist_feat, hog_feat=hog_feat, add_flipped=add_flipped)
 print("Extracting not-car features...")
 notcar_features = extract_features(notcars, color_space=color_space, 
                         spatial_size=spatial_size, hist_bins=hist_bins, 
                         orient=orient, pix_per_cell=pix_per_cell, 
                         cell_per_block=cell_per_block, 
                         hog_channel=hog_channel, spatial_feat=spatial_feat, 
-                        hist_feat=hist_feat, hog_feat=hog_feat)
+                        hist_feat=hist_feat, hog_feat=hog_feat, add_flipped=add_flipped)
 X = np.vstack((car_features, notcar_features)).astype(np.float64)                        
+
+print('Final size of car features: ', len(car_features))
+print('Final size of not car features: ', len(notcar_features))
 
 print("Normalizing...")
 # Normalize features

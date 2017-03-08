@@ -28,15 +28,16 @@ hog_feat = dist_pickle["hog_feat"] # HOG features on or off
 
 ystart = 336
 ystop = 656
-scale = 2.0
+scale = 1.5
 
 for filename in glob.glob("test_images/*.jpg"):
+	print(filename)
 	img = mpimg.imread(filename)
 
 	out_img = find_cars(img, 
 		ystart, ystop, scale, clf, color_space, X_scaler, orient,
 		 pix_per_cell, cell_per_block, spatial_size, hist_bins, hog_channel,
-		 spatial_feat, hist_feat, hog_feat)
+		 spatial_feat, hist_feat, hog_feat, False)
 
 	plt.imshow(out_img)
 	orig_filename, _ = os.path.splitext(filename)
