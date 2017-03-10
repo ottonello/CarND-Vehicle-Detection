@@ -1,6 +1,10 @@
 from moviepy.editor import VideoFileClip
 import pickle
+from collections import deque
 from pipeline import find_cars
+
+# Holds detected boxes for last 
+boxes_buffer = deque([], 3)
 
 # Load classifier and parameters
 dist_pickle = pickle.load( open("clf.pkl", "rb" ) )
@@ -24,7 +28,7 @@ hog_feat = dist_pickle["hog_feat"] # HOG features on or off
 def process_image(img):
     return find_cars(img, clf, color_space, X_scaler, orient,
 		 pix_per_cell, cell_per_block, spatial_size, hist_bins, hog_channel,
-		 spatial_feat, hist_feat, hog_feat)
+		 spatial_feat, hist_feat, hog_feat, True, boxes_buffer)
 
 
 output_video = "solution_video.mp4"
