@@ -8,14 +8,13 @@ ystart = 336
 ystop = 656
 
 def find_cars(img, svc, color_space, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins,
-     hog_channel='ALL', spatial_feat=True, hist_feat=True, hog_feat=True, do_threshold=True, 
-     boxes_buffer = None):
+     hog_channel='ALL', spatial_feat=True, hist_feat=True, hog_feat=True, do_threshold=True):
     draw_img = np.copy(img)
 
     cells_per_step1 = 1  # Instead of overlap, define how many cells to step
     scale1 = 1.5
     box_list = do_window_search(img, scale1, cells_per_step1, svc, color_space, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, 
-     hog_channel, spatial_feat, hist_feat, hog_feat, do_threshold, boxes_buffer)
+     hog_channel, spatial_feat, hist_feat, hog_feat, do_threshold)
 
     # cells_per_step2 = 2
     # scale2 = 1
@@ -28,9 +27,9 @@ def find_cars(img, svc, color_space, X_scaler, orient, pix_per_cell, cell_per_bl
     if do_threshold:
         heat = np.zeros_like(img[:,:,0]).astype(np.float)    
         # Add heat to each box in box list
-        heat = add_heat(heat,box_list, boxes_buffer)
+        heat = add_heat(heat,box_list)
         # Apply threshold to help remove false positives
-        heat = apply_threshold(heat,2)
+        heat = apply_threshold(heat,28)
         # Visualize the heatmap when displaying    
         heatmap = np.clip(heat, 0, 255)
 
@@ -45,8 +44,7 @@ def find_cars(img, svc, color_space, X_scaler, orient, pix_per_cell, cell_per_bl
     return draw_img
 
 def do_window_search(img, scale, cells_per_step, svc, color_space, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins,
-     hog_channel='ALL', spatial_feat=True, hist_feat=True, hog_feat=True, do_threshold=True,
-     boxes_buffer = None):
+     hog_channel='ALL', spatial_feat=True, hist_feat=True, hog_feat=True, do_threshold=True):
     img = img.astype(np.float32)/255
     
     img_tosearch = img[ystart:ystop,:,:]
@@ -136,45 +134,35 @@ def do_window_search(img, scale, cells_per_step, svc, color_space, X_scaler, ori
             if test_prediction == 1:
                 box_list.append(box)
 
-    # Add all detected boxes to buffer
-    if boxes_buffer != None:
-        boxes_buffer.append(box_list)
-
     return box_list
 
 
-def overlap(box, boxes_buffer):
-    for boxes in boxes_buffer:
-        for ex_box in boxes:
-            x1 = ex_box[0][0]
-            x2 = ex_box[1][0]
-            y1 = ex_box[0][1]
-            y2 = ex_box[1][1]
-            # print(x1, x2, y1,y2)
-            # print(ex_box)
-            noOverlap = (x1 > box[1][0] or x2 < box[0][1])
-            # print(noOverlap)
-
-            if not noOverlap:
-                return True
-    return False
-
-def add_heat(heatmap, bbox_list, boxes_buffer):
+def add_heat(heatmap, bbox_list):
     # Iterate through list of bboxes
     for box in bbox_list:
-        if boxes_buffer == None or overlap(box, boxes_buffer):
-            # Add += 1 for all pixels inside each bbox
-            # Assuming each "box" takes the form ((x1, y1), (x2, y2))
-            heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1
+        # Add += 1 for all pixels inside each bbox
+        # Assuming each "box" takes the form ((x1, y1), (x2, y2))
+        heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1
 
     # Return updated heatmap
     return heatmap# Iterate through list of bboxes
     
+from collections import deque
+
+# Holds detected boxes for last frames
+heat_buffer = deque([], 6)
+
 def apply_threshold(heatmap, threshold):
+    global heat_buffer
+    heat_buffer.append(heatmap)
+
+    # averaged_heatmap = (np.sum(heat_buffer)/len(heat_buffer)).astype(int)
+    averaged_heatmap = sum(heat_buffer)
+    
     # Zero out pixels below the threshold
-    heatmap[heatmap <= threshold] = 0
+    averaged_heatmap[averaged_heatmap <= threshold] = 0
     # Return thresholded map
-    return heatmap
+    return averaged_heatmap
 
 
 def draw_labeled_bboxes(img, labels):

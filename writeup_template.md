@@ -31,10 +31,11 @@ The goals / steps of this project are the following:
 [image9]: ./examples/test5.png
 [image10]: ./examples/test6.png
 
-[image11]: ./examples/det_test6.png
-[image12]: ./examples/det_test6.png
+[image13]: ./examples/test6.png
 
-[image13]: 
+[image11]: ./examples/det_test6.png
+[image12]: ./examples/3_thresholded.png
+
 [image14]: ./examples/udacity_notcar_sample.png
 
 [video1]: ./project_video.mp4
@@ -69,6 +70,8 @@ These are a couple samples:
 
 <img src="./examples/udacity_car_sample.png" alt="Drawing" width="300" height="300"/>
 <img src="./examples/udacity_notcar_sample.png" alt="Drawing" width="300" height="300"/>
+
+I decided not to use this dataset in the end, because the training on the classifier wasn't giving good results.
 
 I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  
 I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
@@ -105,8 +108,12 @@ In the end I decided the linear SVC was sufficiently good at classifying the dat
 
 ####1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
+
+The window search implementation is contained in the `pipeline.py` file, starting from line 10 on method `find_cars`, and
+continuing in the next method, `do_window_search`.  
+
 I decided to search for cars on the lower half of the image, using subsampling. First I took the HOG features for the whole
-image on each channel(lines 78-83, `pipeline.py`). Then, a window is slid across the image with some amount of overlapping.
+image on each channel(lines 76-81, `pipeline.py`). Then, a window is slid across the image with some amount of overlapping.
 I tried using two window sizes to catch both close and further cars, but the added processing time didn't render much
  better detection, with higher false positives as well. So the final implementation uses a single window size.
 
@@ -133,11 +140,12 @@ Here's a [link to my video result](./solution_video.mp4)
 
 ####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
-I recorded the positions of positive detections in each frame of the video. 
-From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  
-I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  
-I then assumed each blob corresponded to a vehicle.  
-I constructed bounding boxes to cover the area of each blob detected.  
+Using the positive detections from each frame I created a heatmap, 
+and using a buffer I stored the heatmaps from the last 6 frames.
+I then added those heatmaps app thresholded it to identify vehicle positions.
+  
+I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  
+I constructed bounding boxes to cover the area of each blob detected.
 
 Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` 
 and the bounding boxes then overlaid on the last frame of video:
@@ -155,7 +163,7 @@ and the bounding boxes then overlaid on the last frame of video:
 ![alt text][image11]
 
 ### Here the resulting bounding boxes are drawn onto the last frame in the series:
-![alt text][image7]
+![alt text][image12]
 
 
 
@@ -163,7 +171,15 @@ and the bounding boxes then overlaid on the last frame of video:
 
 ###Discussion
 
-####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+The pipeline I applied in the final version seems to work quite well with the project video. I worked hard to minimise the 
+false positives after the initial classification but in the end solutions which take into account results from multiple
+frames are important in cleaning up the noisy results.
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+The classifier could still be improved, and definitely something could be done to augment the input data. As mentioned
+ above, I tried also using Udacity's test data to train the classifier, but it would seem there is some difference between
+ the resulting training sets, which makes the classifier perform worse when using both sets.
 
+One important result to take into account is that the labeling process adds up adjacent zones in the heat map but there
+is no way of telling whether each label is a single car or multiple cars next to each other(which is noticeable in the
+result video). Maybe this process can be used as an additional input to a deep learning implementation, helping it locate zones
+where to look for cars.
