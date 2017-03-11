@@ -62,11 +62,13 @@ Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
 I also tried extracting images from the Udacity datasets from (https://github.com/udacity/self-driving-car/tree/master/annotations).
 I did this automatically by getting the car rects for the car dataset, and doing a sliding search window for parts that don't overlap with any
-of the car rects. This is done in the `udacityDatasetExtraction` folder. 
+of the car rects. This is done in the `udacityDatasetExtraction` folder. Then the cars are resized to 64x64. I used the second dataset, since it
+ tags occluded cars which I wanted to avoid in this case.
+
+These are a couple samples:
 
 <img src="./examples/udacity_car_sample.png" alt="Drawing" width="300" height="300"/>
 <img src="./examples/udacity_notcar_sample.png" alt="Drawing" width="300" height="300"/>
-
 
 I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  
 I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
@@ -126,7 +128,7 @@ color in the feature vector, which provided a nice result.  Here are some exampl
 ### Video Implementation
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./result_video.mp4)
+Here's a [link to my video result](./solution_video.mp4)
 
 
 ####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
