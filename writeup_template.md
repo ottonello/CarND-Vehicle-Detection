@@ -64,7 +64,8 @@ I also tried extracting images from the Udacity datasets from (https://github.co
 I did this automatically by getting the car rects for the car dataset, and doing a sliding search window for parts that don't overlap with any
 of the car rects. This is done in the `udacityDatasetExtraction` folder. 
 
-<img src="./examples/udacity_car_sample.png" alt="Drawing" style="width: 200px;"/>
+<img src="./examples/udacity_car_sample.png" alt="Drawing" style="width: 400px;"/>
+<img src="./examples/udacity_notcar_sample.png" alt="Drawing" style="width: 400px;"/>
 
 
 I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  
