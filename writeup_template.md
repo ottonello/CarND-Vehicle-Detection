@@ -34,6 +34,9 @@ The goals / steps of this project are the following:
 [image11]: ./examples/det_test6.png
 [image12]: ./examples/det_test6.png
 
+[image13]: 
+[image14]: ./examples/udacity_notcar_sample.png
+
 [video1]: ./project_video.mp4
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/513/view) Points
@@ -56,6 +59,13 @@ I started by reading in all the `vehicle` and `non-vehicle` images.
 Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
 ![alt text][image1]
+
+I also tried extracting images from the Udacity datasets from (https://github.com/udacity/self-driving-car/tree/master/annotations).
+I did this automatically by getting the car rects for the car dataset, and doing a sliding search window for parts that don't overlap with any
+of the car rects. This is done in the `udacityDatasetExtraction` folder. 
+
+<img src="./examples/udacity_car_sample.png" alt="Drawing" style="width: 200px;"/>
+
 
 I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  
 I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
