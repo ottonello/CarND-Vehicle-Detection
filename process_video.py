@@ -3,7 +3,7 @@ import pickle
 from collections import deque
 from pipeline import find_cars
 
-# Holds detected boxes for last 
+# Holds detected boxes for last frames
 boxes_buffer = deque([], 3)
 
 # Load classifier and parameters
